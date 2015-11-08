@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tiled WMS example</title>
+<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="http://openlayers.org/en/v3.10.1/css/ol.css" type="text/css">
+<script src="http://openlayers.org/en/v3.10.1/build/ol.js"></script>
+
+</head>
+<body>
+<div class="container-fluid">
+
+<div class="row-fluid">
+  <div class="span12">
+    <div id="map" class="map"></div>
+  </div>
+</div>
+
+</div>
+<script>
+var wms = new ol.source.TileWMS({
+  url: 'http://sedac.ciesin.columbia.edu/geoserver/wms',
+  params: {'LAYERS': 'gpw-v3:gpw-v3-population-count-future-estimates_2015', 'TILED': true},
+  serverType: 'geoserver'
+});
+
+var layers = [
+  new ol.layer.Tile({
+    source: new ol.source.MapQuest({layer: 'osm'})
+  })
+  ,
+  new ol.layer.Tile({
+    source: wms
+  })
+];
+
+var view = new ol.View({
+  center: [-10997148, 4569099],
+  zoom: 4
+});
+
+var map = new ol.Map({
+  layers: layers,
+  target: 'map',
+  view: view
+});
+
+map.on('singleclick', function(evt) {
+  var viewResolution = /** @type {number} */ (view.getResolution());
+  var url = wms.getGetFeatureInfoUrl(
+      evt.coordinate, viewResolution, 'EPSG:3857',
+      {'INFO_FORMAT': 'application/json'});
+  if (url) {
+    console.log(url);
+  }
+});
+
+</script>
+</body>
+</html>
